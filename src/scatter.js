@@ -31,7 +31,9 @@ Scatter.ATTRS = {
    * 生成时不执行动画
    * @type {Object}
    */
-  animate : false
+  animate : false,
+
+  legendType : null
 };
 
 Util.extend(Scatter,Cartesian);

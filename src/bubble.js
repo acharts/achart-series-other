@@ -30,6 +30,8 @@ Bubble.ATTRS = {
    * @type {Object}
    */
   activeCircle : {},
+
+  legendType : 'circle',
   
   animate : true,
 

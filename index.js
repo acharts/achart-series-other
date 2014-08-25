@@ -1,3 +1,9 @@
-var achartSeriesOther;
+var Series = require('achart-series');
 
-module.exports = achartSeriesOther;
+Series.Bubble = require('./src/bubble');
+
+Series.Scatter = require('./src/scatter');
+
+Series.Flag = require('./src/flag');
+
+module.exports = Series;
