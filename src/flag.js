@@ -1,12 +1,12 @@
 /*
-*
-* @line图的tag
-*
-* */
+ *
+ * @line图的tag
+ *
+ * */
 
 var
-    Cartesian = require('achart-series').Cartesian,
-    Util = require('achart-util');
+    Cartesian = require('./cartesian'),
+    Util = require('../../util');
 
 function trySet(obj,name,value){
     if(obj && !obj[name]){
@@ -104,6 +104,8 @@ Util.augment(Flag,{
                     point = series.findPointByValue(xValue);
                 }
 
+                if(!point) return true;
+
                 //若存在坐标轴一样的flag  往上堆叠
                 Util.each(data,function(newItem,newIndex){
                     if(newIndex < index && item[xField] == newItem[xField]){
@@ -113,7 +115,8 @@ Util.augment(Flag,{
 
                 var finalDistance = distance > 0 ? (distance * (sameNum + 1) + cfg.r * 2 * sameNum) : (distance * (sameNum + 1) - cfg.r * 2 * sameNum);
                 point = Util.mix({},point,{
-                    y: point.y + finalDistance
+                    y: point.y + finalDistance,
+                    index: sameNum
                 });
 
                 point.obj = item;
@@ -141,29 +144,53 @@ Util.augment(Flag,{
         if(custom){
             var customDiv = _self.get('customDiv');
             if(customDiv){
-                Util.each(points,function(point,index){
-                    var flag = customDiv.childNodes[index],
-                        flagWidth = Util.getWidth(flag),
+                Util.each(customDiv.childNodes,function(flag,index){
+                    var point = points[index];
+
+                    if(!point){
+                        flag.style.display = "none";
+                        return true;
+                    }
+
+                    var flagWidth = Util.getWidth(flag),
                         x = point.x,
                         y = point.y,
                         flagHeight = Util.getHeight(flag),
                         left = x - flagWidth/2,
-                        top = y + distance - flagHeight/2
+                        top = y + distance - flagHeight/2;
+
                     flag.style.cssText = "z-index:5;position:absolute;left:"+ left +"px;top:"+ top +"px";
                 });
+                /*Util.each(points,function(point,index){
+                 var flag = customDiv.childNodes[index],
+                 flagWidth = Util.getWidth(flag),
+                 x = point.x,
+                 y = point.y,
+                 flagHeight = Util.getHeight(flag),
+                 left = x - flagWidth/2,
+                 top = y + distance - flagHeight/2
+                 flag.style.cssText = "z-index:5;position:absolute;left:"+ left +"px;top:"+ top +"px";
+                 });*/
             }
         }else{
             if(groups){
-                Util.each(points,function(point,index){
-                   var group =  groups[index],
-                       x = point.x,
-                       y = point.y,
-                       shapes = group.get('children'),
-                       circle = shapes[0],line = shapes[1];
+                Util.each(groups,function(group,index){
+
+                    var point = points[index];
+
+                    if(!point){
+                        group.hide();
+                        return true;
+                    }
+
+                    var x = point.x,
+                        y = point.y,
+                        shapes = group.get('children'),
+                        circle = shapes[0],line = shapes[1];
 
                     circle.attr({
-                       cx: x,
-                       cy: distance > 0 ? (y + cfg.r) : (y - cfg.r)
+                        cx: x,
+                        cy: distance > 0 ? (y + cfg.r) : (y - cfg.r)
                     });
                     line.attr({
                         x1: x,
@@ -172,6 +199,7 @@ Util.augment(Flag,{
                         y2: y - distance
                     });
 
+                    group.show();
                 });
             }
         }
@@ -248,7 +276,7 @@ Util.augment(Flag,{
 
         //自定义html
         if(custom){
-            var title = _self.get('data')[index]['title'],
+            var title = _self.get('data')[index]['html'] || _self.get('html'),
                 html = '<div class="ac-flags"></div>',
                 flag = Util.createDom("<span>" + title + "</span>"),
                 outterNode = _self.get('canvas').get('node').parentNode,
@@ -291,6 +319,11 @@ Util.augment(Flag,{
                 y2: y - distance
             });
             group.addShape('line',cfg);
+
+            //用于changeShape时候对应points和group，不使用index的原因是考虑到stock chart
+            console.log(point)
+            group.set('xValue',point.xValue);
+            group.set('index',point.index);
         }
     },
     /**
