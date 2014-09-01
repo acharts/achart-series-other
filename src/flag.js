@@ -5,8 +5,8 @@
  * */
 
 var
-    Cartesian = require('./cartesian'),
-    Util = require('../../util');
+    Cartesian = require('achart-series').Cartesian,
+    Util = require('achart-util');
 
 function trySet(obj,name,value){
     if(obj && !obj[name]){

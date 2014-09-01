@@ -111,4 +111,4 @@ Util.augment(Scatter,{
 
 });
 
-return Scatter;
+module.exports = Scatter;
