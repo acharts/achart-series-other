@@ -52,14 +52,12 @@ Flag.ATTRS = {
      * 使用html
      * @type {bool}
      */
-
     custom: false,
 
     /**
      * 使用html时候的内容
      * @type {String}
      */
-
     title: null
 
 };
