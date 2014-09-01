@@ -16,7 +16,7 @@ function trySet(obj,name,value){
 
 /**
  * @class Chart.Series.Flag
- * 使用线连接数据的数据图序列
+ * 图列上面的标识
  * @extends Chart.Series.Cartesian
  */
 function Flag(cfg){
@@ -66,6 +66,7 @@ Flag.ATTRS = {
 
 Util.augment(Flag,{
     /**
+     *  @private
      *  重写获取point函数
      */
     _getPoints : function(){
@@ -128,6 +129,7 @@ Util.augment(Flag,{
         return points;
     },
     /**
+     *  @private
      *  重写legend导致的画面变动
      */
     changeShapes : function(points,animate){
@@ -204,6 +206,7 @@ Util.augment(Flag,{
             }
         }
     },
+    //根据points画出标记
     draw : function(points,callback){
         var _self = this,
             animate = _self.get('animate'),
@@ -261,6 +264,7 @@ Util.augment(Flag,{
 
     },
     /**
+     *  @private
      *  根据点绘制
      */
     _drawShape: function(point,index){
@@ -327,6 +331,7 @@ Util.augment(Flag,{
         }
     },
     /**
+     * @private
      * 开放事件接口
      */
     bindFlagEvent: function(){
@@ -343,6 +348,7 @@ Util.augment(Flag,{
         });
     },
     /**
+     *  @private
      *  自定义事件时，添加tooltip
      */
     bindTooltip: function(element){
@@ -358,6 +364,7 @@ Util.augment(Flag,{
         });
     },
     /**
+     *  @private
      * 自定义flag开放事件接口
      */
     bindDomEvent: function(element){
@@ -373,6 +380,7 @@ Util.augment(Flag,{
         });
     },
     /**
+     * @private
      * 显示
      */
     show : function(){
@@ -386,6 +394,7 @@ Util.augment(Flag,{
         }
     },
     /**
+     * @private
      * 隐藏
      */
     hide : function(){
