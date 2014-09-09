@@ -6,18 +6,18 @@ var Canvas = require('achart-canvas'),
   Series = require('../src/scatter'),
   PlotRange = require('achart-plot').Range,
   Axis = require('achart-axis'),
-
+  Simulate = require('event-simulate'),
   NAxis = Axis.Number,
   CAxis = Axis.Category;
 
-  $('<div id="s1"></div>').prependTo('body');
+  $('<div id="s2"></div>').prependTo('body');
 
 
 
 describe('scatter 序列生成',function(){
 
   var canvas = new Canvas({
-    id : 's1',
+    id : 's2',
     width : 900,
     height : 500
   });
@@ -110,9 +110,14 @@ describe('scatter 序列生成',function(){
 
 
   describe('test create',function(){
-    it('create',function(){
-      expect(series.get('markersGroup')).not.to.be(undefined);
-      expect(series.get('markersGroup').getCount()).to.be(series.get('data').length);
+    it('create',function(done){
+
+      setTimeout(function(){
+        expect(series.get('markersGroup')).not.to.be(undefined);
+        expect(series.get('markersGroup').getCount()).to.be(series.get('data').length);
+        done();
+      },1200);
+     
     });
     it('bubble items',function(){
       var firstItem = series.get('markersGroup').getChildAt(5),
@@ -123,16 +128,34 @@ describe('scatter 序列生成',function(){
   });
 
   describe('operation',function(){
-    it('change',function(){
+    it('change',function(done){
 
+      var data = [[64.5, 70.0], [92.0, 101.6], [75.5, 63.2],  
+                      [71.2, 79.1], [81.6, 78.9], [67.4, 67.7], [81.1, 66.0], [77.0, 68.2],   
+                      [74.5, 63.9], [77.5, 72.0], [70.5, 56.8], [82.4, 74.5], [97.1, 90.9],   
+                      [80.1, 93.0], [75.5, 80.9], [80.6, 72.7], [84.4, 68.0], [75.5, 70.9],   
+                      [80.6, 72.5], [77.0, 72.5], [77.1, 83.4], [81.6, 75.5], [76.5, 73.0],   
+                      [75.0, 70.2], [74.0, 73.4], [65.1, 70.5], [77.0, 68.9], [92.0, 102.3],  
+                      [76.5, 68.4], [69.4, 65.9], [82.1, 75.7], [79.8, 84.5]
+                  ];
+      setTimeout(function(){
+        series.changeData(data,true);
+        done();
+      },1000);
     });
 
     it('active',function(){
+      var item = series.get('markersGroup').getFirst();
 
-    });
+      Simulate.simulate(item.get('node'),'mouseover');
 
-    it('clear active',function(){
+      expect(item.get('actived')).to.be(true);
 
+      expect(series.getTrackingInfo()).to.be(item.get('point'));
+
+      Simulate.simulate(item.get('node'),'mouseout');
+
+      expect(item.get('actived')).to.be(false);
     });
 
 
