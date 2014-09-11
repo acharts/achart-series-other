@@ -4,15 +4,9 @@
  *
  * */
 
-var
-    Cartesian = require('achart-series').Cartesian,
+var Cartesian = require('achart-series').Cartesian,
+    Flags = require('achart-flags'),
     Util = require('achart-util');
-
-function trySet(obj,name,value){
-    if(obj && !obj[name]){
-        obj[name] = value;
-    }
-}
 
 /**
  * @class Chart.Series.Flag
@@ -26,40 +20,16 @@ function Flag(cfg){
 Util.extend(Flag,Cartesian);
 
 Flag.ATTRS = {
-
     type : 'flag',
+
     elCls : 'x-chart-flag-series',
-    zIndex: 6,
     /**
-     * 配置
+     * flag 配置项
      * @type {Object}
      */
-    flag : null,
+    flags : null,
 
-    /**
-     * y偏离
-     * @type {Number}
-     */
-    distance: 0,
-
-    /**
-     * 笔触
-     * @type {Object}
-     */
-    line: null,
-
-    /**
-     * 使用html
-     * @type {bool}
-     */
-    custom: false,
-
-    /**
-     * 使用html时候的内容
-     * @type {String}
-     */
-    title: null
-
+    zIndex: 6
 };
 
 Util.augment(Flag,{
@@ -72,9 +42,8 @@ Util.augment(Flag,{
             data = _self.get('data'),
             xField = _self.get('xField'),
             yField = _self.get('yField'),
-            onSeries = _self.get('onSeries'),
+            onSeries = _self.get('onSeries') || '',
             parent = _self.get('parent'),
-            distance = _self.get('distance'),
             series = parent.find(onSeries),
             flagAttrs = _self.get('flag'),
             lineAttrs = _self.get('line'),
@@ -110,15 +79,17 @@ Util.augment(Flag,{
                     if(newIndex < index && item[xField] == newItem[xField]){
                         sameNum ++;
                     }
-                })
+                });
 
-                var finalDistance = distance > 0 ? (distance * (sameNum + 1) + cfg.r * 2 * sameNum) : (distance * (sameNum + 1) - cfg.r * 2 * sameNum);
                 point = Util.mix({},point,{
-                    y: point.y + finalDistance,
+                    y: point.y,
                     index: sameNum
                 });
 
+                item.tooltip = (item.flag && item.flag.text) ? item.flag.text : _self.get('flags').flag.text;
+
                 point.obj = item;
+
             }
             _self.processPoint(point,index);
             points.push(point);
@@ -135,74 +106,22 @@ Util.augment(Flag,{
             flagAttrs = _self.get('flag'),
             lineAttrs = _self.get('line'),
             cfg = Util.mix({},flagAttrs,lineAttrs),
-            custom = _self.get('custom'),
-            distance = _self.get('distance'),
-            groups = _self.get('children');
+            flagGroup = _self.get('flagGroup');
 
         points = points || this._getPoints();
 
-        if(custom){
-            var customDiv = _self.get('customDiv');
-            if(customDiv){
-                Util.each(customDiv.childNodes,function(flag,index){
-                    var point = points[index];
+        flagGroup.removeAll();
 
-                    if(!point){
-                        flag.style.display = "none";
-                        return true;
-                    }
-
-                    var flagWidth = Util.getWidth(flag),
-                        x = point.x,
-                        y = point.y,
-                        flagHeight = Util.getHeight(flag),
-                        left = x - flagWidth/2,
-                        top = y + distance - flagHeight/2;
-
-                    flag.style.cssText = "z-index:5;position:absolute;left:"+ left +"px;top:"+ top +"px";
-                });
-                /*Util.each(points,function(point,index){
-                 var flag = customDiv.childNodes[index],
-                 flagWidth = Util.getWidth(flag),
-                 x = point.x,
-                 y = point.y,
-                 flagHeight = Util.getHeight(flag),
-                 left = x - flagWidth/2,
-                 top = y + distance - flagHeight/2
-                 flag.style.cssText = "z-index:5;position:absolute;left:"+ left +"px;top:"+ top +"px";
-                 });*/
-            }
-        }else{
-            if(groups){
-                Util.each(groups,function(group,index){
-
-                    var point = points[index];
-
-                    if(!point){
-                        group.hide();
-                        return true;
-                    }
-
-                    var x = point.x,
-                        y = point.y,
-                        shapes = group.get('children'),
-                        circle = shapes[0],line = shapes[1];
-
-                    circle.attr({
-                        cx: x,
-                        cy: distance > 0 ? (y + cfg.r) : (y - cfg.r)
-                    });
-                    line.attr({
-                        x1: x,
-                        y1: y,
-                        x2: x,
-                        y2: y - distance
-                    });
-
-                    group.show();
-                });
-            }
-        }
+        Util.each(points, function (item, index) {
+            _self._drawShape(item, index);
+        });
+    },
+    /**
+     * 获取提示信息
+     * @return {*} 返回显示在上面的文本
+     */
+    getTipItem : function(point){
+        return point.obj.tooltip ? point.obj.tooltip : point.value;
     },
     //根据points画出标记
     draw : function(points,callback){
@@ -210,11 +129,13 @@ Util.augment(Flag,{
             animate = _self.get('animate'),
             duration = _self.get('duration');
 
+        //添加Flags
+        _self.set('flagGroup',_self.addGroup(Flags,_self.get('flags')))
+
         if(!animate) {
             Util.each(points, function (item, index) {
                 _self._drawShape(item, index);
             });
-
             _after();
         }else{
             var onSeries = _self.get('onSeries'),
@@ -247,7 +168,6 @@ Util.augment(Flag,{
         }
 
         function _after(){
-            _self.bindFlagEvent();
             callback && callback();
         }
 
@@ -267,143 +187,32 @@ Util.augment(Flag,{
      */
     _drawShape: function(point,index){
         var _self = this,
-            flagAttrs = _self.get('flag'),
-            lineAttrs = _self.get('line'),
-            custom = _self.get('custom'),
-            x = point.x,
-            y = point.y,
-            distance = _self.get('distance'),
-            flagShape = _self.get('flagShape'),
-            cfg = Util.mix({},flagAttrs,lineAttrs);
+            data = _self.get('data'),
+            flagGroup = _self.get('flagGroup'),
+            flagCfg = _self.get('flags');
 
-        //自定义html
-        if(custom){
-            var title = _self.get('data')[index]['html'] || _self.get('html'),
-                html = '<div class="ac-flags"></div>',
-                flag = Util.createDom("<span>" + title + "</span>"),
-                outterNode = _self.get('canvas').get('node').parentNode,
-                customDiv = _self.get('customDiv');
+        flagCfg.flag.point = point;
+        var cfg = Util.mix({},{},{point: point});
 
-            outterNode.style.position = 'relative';
-
-            //判断是否存在 不存在则追加并绑定事件
-            if(!customDiv){
-                customDiv = Util.createDom(html);
-                outterNode.appendChild(customDiv);
-
-                _self.bindTooltip(customDiv);
-                _self.bindDomEvent(customDiv);
-
-            }
-            customDiv.appendChild(flag);
-            var flagWidth = Util.getWidth(flag),
-                flagHeight = Util.getHeight(flag),
-                left = x - flagWidth/2,
-                top = y + distance - flagHeight/2
-            flag.style.cssText = "z-index:5;position:absolute;left:"+ left +"px;top:"+ top +"px";
-
-            _self.set('customDiv',customDiv);
-        }else{
-
-            var group = _self.addGroup();
-            //circle
-            cfg = Util.mix(cfg,{
-                cx: x,
-                cy: distance > 0 ? (y + cfg.r) : (y - cfg.r)
-            });
-            group.addShape('circle',cfg);
-
-            //line
-            cfg = Util.mix(cfg,{
-                x1: x,
-                y1: y,
-                x2: x,
-                y2: y - distance
-            });
-            group.addShape('line',cfg);
-
-            //用于changeShape时候对应points和group，不使用index的原因是考虑到stock chart
-            console.log(point)
-            group.set('xValue',point.xValue);
-            group.set('index',point.index);
+        //合并data内容到cfg
+        if(data && data[index] && data[index].flag){
+            Util.mix(cfg,data[index].flag);
         }
-    },
-    /**
-     * @private
-     * 开放事件接口
-     */
-    bindFlagEvent: function(){
-        var _self = this;
 
-        _self.on('click',function(ev){
-            _self.fireUp('flagclick',ev);
-        });
-        _self.on('mouseover',function(ev){
-            _self.fireUp('flagmouseover',ev);
-        });
-        _self.on('mouseout',function(ev){
-            _self.fireUp('flagmouseout',ev);
-        });
-    },
-    /**
-     *  @private
-     *  自定义事件时，添加tooltip
-     */
-    bindTooltip: function(element){
-        var _self = this,
-            parent = _self.get('parent');
-
-        Util.addEvent(element,'mouseover',function(){
-            if(parent.setActivedItem){
-                if(!parent.isItemActived(_self)){
-                    parent.setActivedItem(_self);
+        //向上堆叠
+        if(point.index > 0){
+            Util.each(flagGroup.get('children'),function(item,index){
+                var lastPoint = item.get('point');
+                if(lastPoint.x == point.x && (lastPoint.index + 1) == point.index){
+                    var newY = cfg.distance || item.get('distance') <=0 ? item.get('topY') : item.get('bottomY');
+                    if(newY){
+                        cfg.point.y = newY;
+                    }
                 }
-            }
-        });
-    },
-    /**
-     *  @private
-     * 自定义flag开放事件接口
-     */
-    bindDomEvent: function(element){
-        var _self = this;
-        Util.addEvent(element,'click',function(ev){
-            _self.fireUp('flagclick',ev);
-        });
-        Util.addEvent(element,'mouseover',function(ev){
-            _self.fireUp('flagmouseover',ev);
-        });
-        Util.addEvent(element,'mouseout',function(ev){
-            _self.fireUp('flagmouseout',ev);
-        });
-    },
-    /**
-     * @private
-     * 显示
-     */
-    show : function(){
-        var _self = this,
-            customDiv = _self.get('customDiv');
-        _self.get('el').show();
-        _self.set('visible',true);
-
-        if(customDiv){
-            customDiv.style.display = 'block';
+            });
         }
-    },
-    /**
-     * @private
-     * 隐藏
-     */
-    hide : function(){
-        var _self = this,
-            customDiv = _self.get('customDiv');
-        _self.get('el').hide();
-        _self.set('visible',false);
 
-        if(customDiv){
-            customDiv.style.display = 'none';
-        }
+        flagGroup.addFlag(cfg);
     }
 });
 

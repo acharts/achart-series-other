@@ -17,6 +17,7 @@
     "main": "index.js",
     "dependencies": {
       "achart-util" : "1.0.0",
+      "achart-flags" : "1.0.0",
       "achart-series" : "1.0.0",
       "achart-actived" : "1.0.0"
     },
