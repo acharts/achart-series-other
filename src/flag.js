@@ -108,13 +108,24 @@ Util.augment(Flag,{
             cfg = Util.mix({},flagAttrs,lineAttrs),
             flagGroup = _self.get('flagGroup');
 
+        animate = animate || _self.get('animate');
+
         points = points || this._getPoints();
 
-        flagGroup.removeAll();
+        var newItems = [];
 
         Util.each(points, function (item, index) {
-            _self._drawShape(item, index);
+            var cfg = _self.__getShapeCfg(item, index)
+            newItems.push(cfg);
+
+            //if(flagGroup.get('flagGroups') && flagGroup.get('flagGroups')[index]){
+                //flagGroup.get('flagGroups')[index].changeStackCfg(cfg);
+                flagGroup.changeStackCfg(index,cfg);
+            //}
+
         });
+
+        flagGroup.change(newItems,animate);
     },
     /**
      * 获取提示信息
@@ -187,6 +198,15 @@ Util.augment(Flag,{
      */
     _drawShape: function(point,index){
         var _self = this,
+            flagGroup = _self.get('flagGroup');
+
+        var cfg = _self.__getShapeCfg(point,index);
+
+        var flag = flagGroup.addFlag(cfg);
+        return flag
+    },
+    __getShapeCfg: function(point,index){
+        var _self = this,
             data = _self.get('data'),
             flagGroup = _self.get('flagGroup'),
             flagCfg = _self.get('flags');
@@ -212,7 +232,7 @@ Util.augment(Flag,{
             });
         }
 
-        flagGroup.addFlag(cfg);
+        return cfg;
     }
 });
 
