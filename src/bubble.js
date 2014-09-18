@@ -175,7 +175,7 @@ Util.augment(Bubble,{
     return Math.pow(r,.75);
   },
    //鼠标hover
-  onMouseOver : function(){
+  bindMouseOver : function(){
     var _self = this
     _self.get('group').on('mouseover',function(ev){
       var target = ev.target,
@@ -184,7 +184,7 @@ Util.augment(Bubble,{
     });
   }, 
   //鼠标hover
-  onMouseOut : function(){
+  bindMouseOut : function(){
     var _self = this;
     
     _self.get('group').on('mouseout',function(ev){

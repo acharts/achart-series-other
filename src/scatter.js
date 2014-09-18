@@ -64,7 +64,7 @@ Util.augment(Scatter,{
     });
   },
   //鼠标hover
-  onMouseOver : function(){
+  bindMouseOver : function(){
     var _self = this,
       markersGroup = _self.get('markersGroup');
 
@@ -94,7 +94,7 @@ Util.augment(Scatter,{
     return rst;
   },
   //鼠标移出
-  onMouseOut : function(){
+  bindMouseOut : function(){
     var _self = this,
       markersGroup = _self.get('markersGroup');
 
