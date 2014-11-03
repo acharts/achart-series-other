@@ -29,6 +29,12 @@ Flag.ATTRS = {
      */
     flags : null,
 
+    /**
+     * 标记的series的Id
+     * @type {String}
+     */
+    onSeries: null,
+
     zIndex: 6
 };
 
@@ -117,12 +123,7 @@ Util.augment(Flag,{
         Util.each(points, function (item, index) {
             var cfg = _self.__getShapeCfg(item, index)
             newItems.push(cfg);
-
-            //if(flagGroup.get('flagGroups') && flagGroup.get('flagGroups')[index]){
-                //flagGroup.get('flagGroups')[index].changeStackCfg(cfg);
-                flagGroup.changeStackCfg(index,cfg);
-            //}
-
+            flagGroup.changeStackCfg(index,cfg);
         });
 
         flagGroup.change(newItems,animate);
