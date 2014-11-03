@@ -132,7 +132,7 @@ Util.augment(Flag,{
      * 获取提示信息
      * @return {*} 返回显示在上面的文本
      */
-    getTipItem : function(point){
+    getTipInfo : function(point){
         return point.obj.tooltip ? point.obj.tooltip : point.value;
     },
     //根据points画出标记
