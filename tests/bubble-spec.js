@@ -73,6 +73,11 @@ describe('测试序列生成',function(){
     circle : {
       'fill-opacity' : .5
     },
+    labels : {
+      label : {
+        'font-size' : 12
+      }
+    },
     activeCircle : {
       stroke : "red"
     },
@@ -123,10 +128,21 @@ describe('测试序列生成',function(){
                       [76.5, 68.4], [69.4, 65.9], [82.1, 75.7], [79.8, 84.5]];
       series.changeData(data,true);
       setTimeout(function(){
-        //expect(series.get('group').getCount()).to.be(data.length);
+        expect(series.get('group').getCount()).to.be(data.length);
         done();
       },1000);
       
+    });
+
+    it('continue change',function (done) {
+      
+      var data = [[97,36,79],[94,74,60],[68,76,58],[64,87,56],[68,27,73],[74,99,42],[7,93,87],[51,69,40],[38,23,33],[57,86,31]];
+
+      series.changeData(data,true);
+      setTimeout(function(){
+        expect(series.get('group').getCount()).to.be(data.length);
+        done();
+      },1000);
     });
 
     it('active',function(){
@@ -142,8 +158,108 @@ describe('测试序列生成',function(){
 
       expect(item.get('actived')).to.be(false);
     });
-
-
-
   });
 });
+
+
+
+describe('测试序列生成',function(){
+
+  var canvas = new Canvas({
+    id : 'b1',
+    width : 900,
+    height : 500
+  });
+
+  var plotRange = new PlotRange({x : 50,y : 400}, {x : 850, y : 50}),
+    xAxis = canvas.addGroup(NAxis,{
+      plotRange : plotRange,
+      tickOffset : 20,
+      min : 0,
+      tickInterval : 10,
+      max : 100,
+      labels : {
+        label : {
+          y : 12
+        }
+      }
+    });
+
+  var yAxis = canvas.addGroup(NAxis,{
+      plotRange : plotRange,
+      line : null,
+      tickLine : null,
+      grid : {
+        line : {
+          stroke : '#c0c0c0'
+        }
+      },
+      title : {
+        text : 'xsxxxxx',
+        font : '16px bold',
+        fill : 'blue',
+        rotate : 90,
+        x : -30
+      },
+      min : -10,
+      max : 120,
+      position:'left',
+      tickInterval : 20,
+      labels : {
+        label : {
+          x : -12
+        }
+      }
+    });
+
+  canvas.sort();
+
+  var series = canvas.addGroup(Series,{
+    xAxis : xAxis,
+    yAxis : yAxis,
+    color : '#2f7ed8',
+    circle : {
+      'fill-opacity' : .5
+    },
+    labels : {
+      label : {
+        'font-size' : 12
+      }
+    },
+    activeCircle : {
+      stroke : "red"
+    },
+    data: [
+      {x : 97,y:36,r:79,name : '1'},
+      {x : 94,y:74,r:60,name : '2'},
+      {x : 68,y:76,r:58,name : '3'},
+      {x : 64,y:87,r:56,name : '4'},
+      {x : 68,y:27,r:73,name : '5'},
+      {x : 74,y:99,r:42,name : '6'},
+      {x : 7,y:93,r:87,name : '7'},
+      {x : 51,y:69,r:40,name : '8'},
+      {x : 38,y:23,r:33,name : '9'},
+      {x : 57,y:86,r:31,name : '10'}
+    ]
+  });
+
+  series.paint();
+
+
+
+  describe('test create',function(){
+
+    it('create',function(done){
+      setTimeout(function(){
+        expect(series.get('group')).not.to.be(undefined);
+        expect(series.get('group').getCount()).to.be(series.get('data').length);
+        done();
+      },1000);
+      
+    });
+    
+  });
+
+});
+
+/**/

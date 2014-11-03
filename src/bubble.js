@@ -32,8 +32,21 @@ Bubble.ATTRS = {
   activeCircle : {},
 
   legendType : 'circle',
+
+  /**
+   * 如果传入的数据是对象那么这个字段标示半径代表的字段
+   * @type {String}
+   */
+  radiusField : 'r',
   
   animate : true,
+
+  /**
+   * 格式化半径函数
+   */
+  radiusFormatter : function  (r) {
+    return Math.pow(r,.75);
+  },
 
   autoPaint : false,
 
@@ -84,12 +97,25 @@ Util.augment(Bubble,{
 
     Util.each(items,function(item,index){
       var point = points[index];
-      item.animate({
-        cx : point.x,
-        cy : point.y
-      },_self.get('changeDuration'));
-      item.set('point',point);
+      if(point){
+        item.animate({
+          cx : point.x,
+          cy : point.y
+        },_self.get('changeDuration'));
+        item.set('point',point);
+      }
     });
+    var count = items.length;
+    if(points.length < count){
+      for(var i = count-1; i >= points.length; i--){
+        items[i].remove();
+      }
+    }
+    if(points.length > count){
+      for(var i = count; i < points.length ; i ++){
+        _self.addBubble(points[i]);
+      }
+    }
 
   },
   /**
@@ -146,13 +172,17 @@ Util.augment(Bubble,{
       circle = _self.get('circle'),
       r = 5, //默认5
       radius,
+      radiusField = _self.get('radiusField'),
       cfg = Util.mix({},circle),
       shape;
     if(point.obj){
-      r = point.obj['r'];
+      r = point.obj[radiusField];
     }
     if(point.arr){
       r = point.arr[2];
+      if(r == null){
+        r = point.arr[1];
+      }
     }
     radius = _self._getRadius(r);
     
@@ -169,10 +199,19 @@ Util.augment(Bubble,{
       shape = _self.get('group').addShape('circle',cfg);
     }
 
+    if(_self.get('labels')){
+      _self.addLabel(point.value,point);
+    }
+
     shape.set('point',point);
   },
   _getRadius : function(r){
-    return Math.pow(r,.75);
+    var _self = this,
+      radiusFormatter = _self.get('radiusFormatter');
+    if(radiusFormatter){
+      return radiusFormatter(r);
+    }
+    return r;
   },
    //鼠标hover
   bindMouseOver : function(){

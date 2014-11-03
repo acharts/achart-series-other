@@ -29,6 +29,6 @@
       "jquery" : "1.9.1",
       "sinon" : "1.6.0"
     },
-    "tests": "tests/*-spec.js"
+    "tests": "tests/bubble-spec.js"
   }
 }
