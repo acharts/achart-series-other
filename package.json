@@ -1,6 +1,6 @@
 {
   "name": "achart-series-other",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "other series like bubble,scatter,flag and so on.",
   "keywords": [],
   "homepage": "https://github.com/acharts/achart-series-other",
@@ -16,10 +16,10 @@
   "spm": {
     "main": "index.js",
     "dependencies": {
-      "achart-util" : "1.0.0",
-      "achart-flags" : "1.0.0",
-      "achart-series" : "1.0.0",
-      "achart-actived" : "1.0.0"
+      "achart-util" : "~1.1.0",
+      "achart-flags" : "~1.0.0",
+      "achart-series" : "~1.0.3",
+      "achart-actived" : "~1.0.1"
     },
     "devDependencies": {
       "expect.js": "0.3.1",
